@@ -1,12 +1,225 @@
-﻿<Window x:Class="GukLauncher.MainWindow"
+<Window x:Class="GukLauncher.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:GukLauncher"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Guktown Launcher" Height="560" Width="860"
+        WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent" ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
 
-    </Grid>
+    <Border Background="#0F1923" CornerRadius="8"
+            BorderBrush="#C8A020" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="70"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="96"/>
+            </Grid.RowDefinitions>
+
+            <!-- ═══ Title bar ═══ -->
+            <Grid Grid.Row="0" Background="#080E14"
+                  MouseLeftButtonDown="TitleBar_Drag">
+                <TextBlock Text="GUKTOWN LAUNCHER" Foreground="#C8A020"
+                           FontSize="10" FontWeight="Bold"
+                           VerticalAlignment="Center" Margin="14,0"/>
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal"
+                            Margin="0,0,4,0" VerticalAlignment="Center">
+
+                    <Button Content="─" Width="28" Height="28" Click="Minimize_Click">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background"     Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Foreground"     Value="#7A8B9A"/>
+                                <Setter Property="Cursor"         Value="Hand"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                                                <TextBlock x:Name="Txt" Text="{TemplateBinding Content}"
+                                                           Foreground="{TemplateBinding Foreground}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#1E2D3D"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Content="✕" Width="28" Height="28" Click="Close_Click">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background"     Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Foreground"     Value="#7A8B9A"/>
+                                <Setter Property="Cursor"         Value="Hand"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                                                <TextBlock Text="{TemplateBinding Content}"
+                                                           Foreground="{TemplateBinding Foreground}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#5C1A1A"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- ═══ Header ═══ -->
+            <Border Grid.Row="1" BorderBrush="#C8A020" BorderThickness="0,0,0,1">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#080E14" Offset="0"/>
+                        <GradientStop Color="#0F1923" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <StackPanel VerticalAlignment="Center" Margin="20,0">
+                    <TextBlock Text="GUKTOWN" FontSize="28" FontWeight="Black" Foreground="#C8A020"/>
+                    <TextBlock Text="EverQuest Private Server" FontSize="12"
+                               Foreground="#4A6070" Margin="2,2,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ═══ Main content ═══ -->
+            <Grid Grid.Row="2" Margin="12,10,12,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2.2*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Patch notes panel -->
+                <Border Grid.Column="0" Background="#111D2A" CornerRadius="4"
+                        BorderBrush="#1E3A50" BorderThickness="1">
+                    <DockPanel Margin="14,10,10,10">
+                        <TextBlock DockPanel.Dock="Top" Text="PATCH NOTES"
+                                   Foreground="#C8A020" FontSize="10" FontWeight="Bold"
+                                   Margin="0,0,0,8"/>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding PatchNotes}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,0,0,10">
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                                <TextBlock FontSize="11" FontWeight="Bold" Foreground="#C8A020">
+                                                    <Run Text="v"/><Run Text="{Binding Version, Mode=OneWay}"/>
+                                                </TextBlock>
+                                                <TextBlock Text="  ·  " Foreground="#4A6070" FontSize="11"/>
+                                                <TextBlock Text="{Binding Date}" Foreground="#4A6070" FontSize="11"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Body}" Foreground="#A0B4C0"
+                                                       FontSize="12" TextWrapping="Wrap" FontFamily="Consolas"/>
+                                            <Separator Background="#1E3A50" Margin="0,8,0,0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Border>
+
+                <!-- Server info panel -->
+                <Border Grid.Column="2" Background="#111D2A" CornerRadius="4"
+                        BorderBrush="#1E3A50" BorderThickness="1">
+                    <StackPanel Margin="14,10">
+                        <TextBlock Text="SERVER" Foreground="#C8A020"
+                                   FontSize="10" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <Ellipse Width="7" Height="7" Fill="#4CAF50"
+                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="Online" Foreground="#D4C5A0" FontSize="12"/>
+                        </StackPanel>
+                        <TextBlock Text="Guktown" Foreground="#4A6070" FontSize="11" Margin="13,0,0,0"/>
+
+                        <Separator Background="#1E3A50" Margin="0,14,0,14"/>
+
+                        <TextBlock Text="LAUNCHER" Foreground="#C8A020"
+                                   FontSize="10" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <TextBlock Text="v1.0.0" Foreground="#D4C5A0" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- ═══ Patcher controls ═══ -->
+            <Border Grid.Row="3" Background="#080E14"
+                    BorderBrush="#C8A020" BorderThickness="0,1,0,0">
+                <Grid Margin="20,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="130"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Status + progress bar -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding StatusMessage}" Foreground="#D4C5A0"
+                                   FontSize="12" Margin="0,0,0,6"/>
+                        <ProgressBar Value="{Binding Progress}" Maximum="100" Height="6"
+                                     Background="#1E3A50" Foreground="#C8A020" BorderThickness="0"/>
+                        <TextBlock Text="{Binding ProgressDetail}" Foreground="#4A6070"
+                                   FontSize="10" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <!-- Play button -->
+                    <Button Grid.Column="2" Content="PLAY"
+                            Command="{Binding PlayCommand}"
+                            Height="52" FontSize="16" FontWeight="Bold">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background"     Value="#1A5C1A"/>
+                                <Setter Property="Foreground"     Value="White"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Cursor"         Value="Hand"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                <TextBlock x:Name="BtnText"
+                                                           Text="{TemplateBinding Content}"
+                                                           Foreground="{TemplateBinding Foreground}"
+                                                           FontSize="{TemplateBinding FontSize}"
+                                                           FontWeight="{TemplateBinding FontWeight}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#237A23"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter Property="Background" Value="#144414"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Background" Value="#1A2A1A"/>
+                                                    <Setter TargetName="BtnText" Property="Foreground" Value="#3A5A3A"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Border>
+
+        </Grid>
+    </Border>
 </Window>
