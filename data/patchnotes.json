@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.0.1",
+    "date": "2026-06-10",
+    "body": "## New Items\n\n**Guise of the Deceiver** now evolves through 5 stages as you gain experience. The base item still drops from a_ghoul_assassin in Lower Guk. Each stage grants improved stats and eventually unlocks a permanent Dark Elf illusion and a Wake the Dead click effect.\n\n**Phylactery of Guktan Souls** \u2014 A new charm slot evolving item available from Giislin Soulmonger, a gnome necromancer merchant located in East Commonlands. Fill the phylactery through combat, then right-click the filled version to transfer stored XP directly into your equipped epic weapon. Purchase price: 500pp.\n\n## Epic Evolving Weapons \u2014 All 16 Classes Complete\n\nAll 16 class epic weapon chains are now live. Each class has evolving versions of their 1.0, 1.5, and 2.0 epics (Warriors have 3 separate 1.0 weapons). Weapons gain stats at each stage as you accumulate kill experience. XP thresholds: 500k per level (1.0), 1M per level (1.5), 2M per level (2.0).\n\n## New Evolving Weapons\n\n**Sword of Skyfire** and **Fayguard Bladecatcher** now evolve through 4 forms with escalating AOE procs and increasing glow. Warriors, Paladins, Rangers, and Shadow Knights can wield both. Rogues and Monks can also use the Bladecatcher. Base items drop from their classic sources. 250k XP per stage.\n\n## Bug Fixes\n\n- Fixed mob aggro in LDoN adventure zones. 52 NPCs across Deepest Guk (gukb, gukd), Miragul's Menagerie (mirc), and Takish-Hiz (take) were missing faction assignments and standing passive. These mobs will now aggro correctly in fresh instances.\n- Fixed 7 LDoN assassination bosses across Miragul's Menagerie (mmca-mmch) that were also affected by the same faction issue.\n- Fixed named mobs in gukc (#Cauldron_Priest_Rotlok), gukf (#Witness_of_Hate_Sovereign), and gukh (#Crakush, #Darta_Warlord_Craknak) that were not aggroing.\n\n## Experience\n\n- Deepest Guk LDoN adventure zones (guka-gukh) XP multiplier increased from 0.86 to 1.10."
+  },
+  {
     "version": "1.0.0",
     "date": "2026-06-09",
     "body": "- Initial release of the Guktown launcher."
