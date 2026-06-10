@@ -307,7 +307,7 @@ public class MainViewModel : INotifyPropertyChanged
             WorkingDirectory = _installDir,
             UseShellExecute  = true,
         });
-        Application.Current.MainWindow.WindowState = WindowState.Minimized;
+        Application.Current.MainWindow.Hide();
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────
