@@ -97,6 +97,7 @@ public class MainViewModel : INotifyPropertyChanged
     public MainViewModel()
     {
         _installDir = AppDomain.CurrentDomain.BaseDirectory;
+        LogService.Init(_installDir);
 
         _http = new HttpClient();
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("GukLauncher/1.0");
@@ -109,6 +110,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     public async Task InitializeAsync()
     {
+        LogService.Log("=== Guktown Launcher started ===");
         await Task.WhenAll(LoadPatchNotesAsync(), CheckForUpdatesAsync());
     }
 
@@ -138,6 +140,7 @@ public class MainViewModel : INotifyPropertyChanged
 
             if (_pendingQueue.Count == 0)
             {
+                LogService.Log("Up to date — no files need patching");
                 SetUI(() =>
                 {
                     StatusMessage  = "Up to date";
@@ -150,6 +153,9 @@ public class MainViewModel : INotifyPropertyChanged
             else
             {
                 long totalBytes = _pendingQueue.Sum(j => j.Size);
+                LogService.Log($"{_pendingQueue.Count} file(s) need updating ({totalBytes / 1024.0 / 1024.0:F1} MB):");
+                foreach (var f in _pendingQueue)
+                    LogService.Log($"  needs patch: {f.RelativePath}");
                 SetUI(() =>
                 {
                     StatusMessage   = $"{_pendingQueue.Count:N0} file(s) need updating  ({totalBytes / 1024.0 / 1024.0:F0} MB)";
@@ -160,6 +166,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
+            LogService.Log($"Update check failed: {ex.Message}");
             SetUI(() =>
             {
                 StatusMessage = $"Update check failed: {ex.Message}";
@@ -195,6 +202,7 @@ public class MainViewModel : INotifyPropertyChanged
         {
             await new DownloadService(_http).DownloadAllAsync(_pendingQueue, _installDir, dlProgress);
 
+            LogService.Log($"Patch complete — {_pendingQueue.Count} file(s) updated");
             SetUI(() =>
             {
                 StatusMessage  = "Up to date";
@@ -207,6 +215,7 @@ public class MainViewModel : INotifyPropertyChanged
         }
         catch (Exception ex)
         {
+            LogService.Log($"Patch failed: {ex.Message}");
             SetUI(() =>
             {
                 StatusMessage   = $"Patch failed: {ex.Message}";
