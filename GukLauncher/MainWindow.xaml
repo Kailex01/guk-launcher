@@ -5,6 +5,9 @@
         WindowStyle="None" AllowsTransparency="True"
         Background="Transparent" ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
 
     <Border CornerRadius="8" BorderBrush="#C8A020" BorderThickness="1">
         <Border.Background>
@@ -180,46 +183,94 @@
                                    FontSize="10" Margin="0,4,0,0"/>
                     </StackPanel>
 
-                    <!-- Play button -->
-                    <Button Grid.Column="2" Content="PLAY"
-                            Command="{Binding PlayCommand}"
-                            Height="52" FontSize="16" FontWeight="Bold">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Background"     Value="#1A5C1A"/>
-                                <Setter Property="Foreground"     Value="White"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Cursor"         Value="Hand"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                                <TextBlock x:Name="BtnText"
-                                                           Text="{TemplateBinding Content}"
-                                                           Foreground="{TemplateBinding Foreground}"
-                                                           FontSize="{TemplateBinding FontSize}"
-                                                           FontWeight="{TemplateBinding FontWeight}"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="Background" Value="#237A23"/>
-                                                </Trigger>
-                                                <Trigger Property="IsPressed" Value="True">
-                                                    <Setter Property="Background" Value="#144414"/>
-                                                </Trigger>
-                                                <Trigger Property="IsEnabled" Value="False">
-                                                    <Setter Property="Background" Value="#1A2A1A"/>
-                                                    <Setter TargetName="BtnText" Property="Foreground" Value="#3A5A3A"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Style>
-                    </Button>
+                    <!-- Button slot: PATCH and PLAY share this cell, only one visible at a time -->
+                    <Grid Grid.Column="2">
+
+                        <!-- PATCH / PATCHING... / RETRY button -->
+                        <Button Content="{Binding PatchButtonText}"
+                                Command="{Binding PatchCommand}"
+                                Visibility="{Binding ShowPatchButton, Converter={StaticResource BoolToVis}}"
+                                Height="52" FontSize="16" FontWeight="Bold">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background"      Value="#8B6000"/>
+                                    <Setter Property="Foreground"      Value="White"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Cursor"          Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                    <TextBlock x:Name="BtnText"
+                                                               Text="{TemplateBinding Content}"
+                                                               Foreground="{TemplateBinding Foreground}"
+                                                               FontSize="{TemplateBinding FontSize}"
+                                                               FontWeight="{TemplateBinding FontWeight}"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#A87800"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter Property="Background" Value="#6A4800"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Background" Value="#3A2A00"/>
+                                                        <Setter TargetName="BtnText" Property="Foreground" Value="#6A5A30"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- PLAY button -->
+                        <Button Content="PLAY"
+                                Command="{Binding PlayCommand}"
+                                Visibility="{Binding ShowPlayButton, Converter={StaticResource BoolToVis}}"
+                                Height="52" FontSize="16" FontWeight="Bold">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background"      Value="#1A5C1A"/>
+                                    <Setter Property="Foreground"      Value="White"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Cursor"          Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                                                    <TextBlock x:Name="BtnText"
+                                                               Text="{TemplateBinding Content}"
+                                                               Foreground="{TemplateBinding Foreground}"
+                                                               FontSize="{TemplateBinding FontSize}"
+                                                               FontWeight="{TemplateBinding FontWeight}"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#237A23"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter Property="Background" Value="#144414"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Background" Value="#1A2A1A"/>
+                                                        <Setter TargetName="BtnText" Property="Foreground" Value="#3A5A3A"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                    </Grid>
                 </Grid>
             </Border>
 

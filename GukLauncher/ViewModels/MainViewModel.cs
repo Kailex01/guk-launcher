@@ -12,6 +12,7 @@ public class MainViewModel : INotifyPropertyChanged
 {
     private readonly HttpClient _http;
     private readonly string _installDir;
+    private List<PatchJob>? _pendingQueue;
 
     // ── Bound properties ───────────────────────────────────────────────────────
 
@@ -48,8 +49,48 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    private bool _patchNeeded;
+    public bool PatchNeeded
+    {
+        get => _patchNeeded;
+        set
+        {
+            _patchNeeded = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowPatchButton));
+            OnPropertyChanged(nameof(ShowPlayButton));
+            Application.Current.Dispatcher.InvokeAsync(CommandManager.InvalidateRequerySuggested);
+        }
+    }
+
+    private bool _isPatching;
+    public bool IsPatching
+    {
+        get => _isPatching;
+        set
+        {
+            _isPatching = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ShowPatchButton));
+            OnPropertyChanged(nameof(ShowPlayButton));
+            Application.Current.Dispatcher.InvokeAsync(CommandManager.InvalidateRequerySuggested);
+        }
+    }
+
+    private string _patchButtonText = "PATCH";
+    public string PatchButtonText
+    {
+        get => _patchButtonText;
+        set { _patchButtonText = value; OnPropertyChanged(); }
+    }
+
+    // Computed visibility helpers — PATCH and PLAY share the same slot
+    public bool ShowPatchButton => PatchNeeded || IsPatching;
+    public bool ShowPlayButton  => !PatchNeeded && !IsPatching;
+
     public ObservableCollection<PatchNote> PatchNotes { get; } = new();
-    public ICommand PlayCommand { get; }
+    public ICommand PlayCommand  { get; }
+    public ICommand PatchCommand { get; }
 
     // ── Constructor ────────────────────────────────────────────────────────────
 
@@ -60,14 +101,15 @@ public class MainViewModel : INotifyPropertyChanged
         _http = new HttpClient();
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("GukLauncher/1.0");
 
-        PlayCommand = new RelayCommand(_ => LaunchGame(), _ => CanPlay);
+        PlayCommand  = new RelayCommand(_ => LaunchGame(),            _ => CanPlay);
+        PatchCommand = new RelayCommand(async _ => await StartPatchingAsync(), _ => PatchNeeded && !IsPatching);
     }
 
     // ── Startup ────────────────────────────────────────────────────────────────
 
     public async Task InitializeAsync()
     {
-        await Task.WhenAll(LoadPatchNotesAsync(), RunPatcherAsync());
+        await Task.WhenAll(LoadPatchNotesAsync(), CheckForUpdatesAsync());
     }
 
     private async Task LoadPatchNotesAsync()
@@ -85,11 +127,53 @@ public class MainViewModel : INotifyPropertyChanged
         catch { /* cosmetic — silently skip if GitHub is unreachable */ }
     }
 
-    private async Task RunPatcherAsync()
+    private async Task CheckForUpdatesAsync()
     {
-        // These Progress<T> objects are created on the UI thread (Loaded event),
-        // so their callbacks are automatically marshalled back to the UI thread.
         var statusProgress = new Progress<string>(msg => StatusMessage = msg);
+        try
+        {
+            StatusMessage = "Checking for updates...";
+            var patcherSvc = new PatcherService(new ManifestService(_http), _installDir);
+            _pendingQueue = await patcherSvc.BuildQueueAsync(statusProgress);
+
+            if (_pendingQueue.Count == 0)
+            {
+                SetUI(() =>
+                {
+                    StatusMessage  = "Up to date";
+                    Progress       = 100;
+                    ProgressDetail = "";
+                    CanPlay        = true;
+                    PatchNeeded    = false;
+                });
+            }
+            else
+            {
+                long totalBytes = _pendingQueue.Sum(j => j.Size);
+                SetUI(() =>
+                {
+                    StatusMessage   = $"{_pendingQueue.Count:N0} file(s) need updating  ({totalBytes / 1024.0 / 1024.0:F0} MB)";
+                    PatchButtonText = "PATCH";
+                    PatchNeeded     = true;
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            SetUI(() =>
+            {
+                StatusMessage = $"Update check failed: {ex.Message}";
+                CanPlay       = true;
+            });
+        }
+    }
+
+    // ── Patch on demand ────────────────────────────────────────────────────────
+
+    private async Task StartPatchingAsync()
+    {
+        if (_pendingQueue == null || _pendingQueue.Count == 0) return;
+
         var dlProgress = new Progress<DownloadProgress>(p =>
         {
             Progress       = p.Percentage;
@@ -98,27 +182,38 @@ public class MainViewModel : INotifyPropertyChanged
                 StatusMessage = p.CurrentFile;
         });
 
+        SetUI(() =>
+        {
+            PatchNeeded     = false;
+            IsPatching      = true;
+            PatchButtonText = "PATCHING...";
+            long totalBytes = _pendingQueue.Sum(j => j.Size);
+            StatusMessage   = $"Downloading {_pendingQueue.Count:N0} file(s)  ({totalBytes / 1024.0 / 1024.0:F0} MB)...";
+        });
+
         try
         {
-            var patcherSvc = new PatcherService(new ManifestService(_http), _installDir);
-            var queue      = await patcherSvc.BuildQueueAsync(statusProgress);
+            await new DownloadService(_http).DownloadAllAsync(_pendingQueue, _installDir, dlProgress);
 
-            if (queue.Count == 0)
+            SetUI(() =>
             {
-                SetUI(() => { StatusMessage = "Up to date"; Progress = 100; ProgressDetail = ""; CanPlay = true; });
-                return;
-            }
-
-            long totalBytes = patcherSvc.GetTotalDownloadSize(queue);
-            SetUI(() => StatusMessage = $"Downloading {queue.Count:N0} file(s)  ({totalBytes / 1024.0 / 1024.0:F0} MB)...");
-
-            await new DownloadService(_http).DownloadAllAsync(queue, _installDir, dlProgress);
-
-            SetUI(() => { StatusMessage = "Up to date"; Progress = 100; ProgressDetail = ""; CanPlay = true; });
+                StatusMessage  = "Up to date";
+                Progress       = 100;
+                ProgressDetail = "";
+                IsPatching     = false;
+                PatchNeeded    = false;
+                CanPlay        = true;
+            });
         }
         catch (Exception ex)
         {
-            SetUI(() => { StatusMessage = $"Patcher error: {ex.Message}"; CanPlay = true; });
+            SetUI(() =>
+            {
+                StatusMessage   = $"Patch failed: {ex.Message}";
+                IsPatching      = false;
+                PatchNeeded     = true;
+                PatchButtonText = "RETRY";
+            });
         }
     }
 
