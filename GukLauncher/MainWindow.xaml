@@ -155,7 +155,7 @@
                                        Foreground="#D4C5A0" FontSize="12"/>
                         </StackPanel>
                         <TextBlock Text="Guktown" Foreground="#4A6070" FontSize="11" Margin="13,0,0,0"/>
-                        <TextBlock Text="{Binding PlayerCountText}" Foreground="#4A6070"
+                        <TextBlock Text="{Binding PlayerCountText}" Foreground="#D4C5A0"
                                    FontSize="10" Margin="13,2,0,0"/>
 
                         <Separator Background="#1E3A50" Margin="0,14,0,14"/>
