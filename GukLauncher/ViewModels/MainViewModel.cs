@@ -257,7 +257,8 @@ public class MainViewModel : INotifyPropertyChanged
     {
         try
         {
-            var status = await new ServerStatusService(_http).FetchAsync();
+            var status = await new ServerStatusService(_http).FetchAsync()
+                .WaitAsync(TimeSpan.FromSeconds(5));
             if (status == null) return;
 
             SetUI(() =>
