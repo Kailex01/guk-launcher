@@ -13,20 +13,14 @@ public class PatcherService
         _installDir      = installDir;
     }
 
-    public bool IsFreshInstall()
-        => !File.Exists(Path.Combine(_installDir, "eqgame.exe"));
-
     public async Task<List<PatchJob>> BuildQueueAsync(
         IProgress<string>? progress = null)
     {
         progress?.Report("Fetching manifest...");
-        var manifest     = await _manifestService.FetchAsync();
-        var freshInstall = IsFreshInstall();
-        var queue        = new List<PatchJob>();
+        var manifest = await _manifestService.FetchAsync();
+        var queue    = new List<PatchJob>();
 
-        progress?.Report(freshInstall
-            ? $"Fresh install — queuing all {manifest.FileCount:N0} files..."
-            : "Checking local files against manifest...");
+        progress?.Report("Checking local files against manifest...");
 
         foreach (var entry in manifest.Files)
         {
@@ -35,17 +29,13 @@ public class PatcherService
 
             bool needsDownload;
 
-            if (freshInstall)
-            {
-                needsDownload = true;
-            }
-            else if (!File.Exists(localPath))
+            if (!File.Exists(localPath))
             {
                 needsDownload = true;
             }
             else if (!entry.Overwrite)
             {
-                // .ini files — never overwrite existing player settings
+                // .ini/.opt files — never overwrite existing player settings
                 needsDownload = false;
             }
             else
