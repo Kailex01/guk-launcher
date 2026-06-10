@@ -1,0 +1,19 @@
+# C# / .NET build output
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.nupkg
+*.snupkg
+
+# Published output
+publish/
+
+# Secrets / local config
+appsettings.Local.json
+*.pfx
+
+# OS
+.DS_Store
+Thumbs.db
