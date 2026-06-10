@@ -148,11 +148,15 @@
                         <TextBlock Text="SERVER" Foreground="#C8A020"
                                    FontSize="10" FontWeight="Bold" Margin="0,0,0,10"/>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                            <Ellipse Width="7" Height="7" Fill="#4CAF50"
+                            <Ellipse Width="7" Height="7"
+                                     Fill="{Binding ServerDotColor}"
                                      VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="Online" Foreground="#D4C5A0" FontSize="12"/>
+                            <TextBlock Text="{Binding ServerStatusText}"
+                                       Foreground="#D4C5A0" FontSize="12"/>
                         </StackPanel>
                         <TextBlock Text="Guktown" Foreground="#4A6070" FontSize="11" Margin="13,0,0,0"/>
+                        <TextBlock Text="{Binding PlayerCountText}" Foreground="#4A6070"
+                                   FontSize="10" Margin="13,2,0,0"/>
 
                         <Separator Background="#1E3A50" Margin="0,14,0,14"/>
 

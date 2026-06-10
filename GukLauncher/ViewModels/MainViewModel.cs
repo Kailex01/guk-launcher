@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using GukLauncher.Models;
 using GukLauncher.Services;
 
@@ -88,6 +89,29 @@ public class MainViewModel : INotifyPropertyChanged
     public bool ShowPatchButton => PatchNeeded || IsPatching;
     public bool ShowPlayButton  => !PatchNeeded && !IsPatching;
 
+    // ── Server status ──────────────────────────────────────────────────────────
+
+    private SolidColorBrush _serverDotColor = new(Color.FromRgb(0x6A, 0x6A, 0x6A));
+    public SolidColorBrush ServerDotColor
+    {
+        get => _serverDotColor;
+        set { _serverDotColor = value; OnPropertyChanged(); }
+    }
+
+    private string _serverStatusText = "Unknown";
+    public string ServerStatusText
+    {
+        get => _serverStatusText;
+        set { _serverStatusText = value; OnPropertyChanged(); }
+    }
+
+    private string _playerCountText = "";
+    public string PlayerCountText
+    {
+        get => _playerCountText;
+        set { _playerCountText = value; OnPropertyChanged(); }
+    }
+
     public ObservableCollection<PatchNote> PatchNotes { get; } = new();
     public ICommand PlayCommand  { get; }
     public ICommand PatchCommand { get; }
@@ -111,7 +135,8 @@ public class MainViewModel : INotifyPropertyChanged
     public async Task InitializeAsync()
     {
         LogService.Log("=== Guktown Launcher started ===");
-        await Task.WhenAll(LoadPatchNotesAsync(), CheckForUpdatesAsync());
+        await Task.WhenAll(LoadPatchNotesAsync(), CheckForUpdatesAsync(), UpdateServerStatusAsync());
+        _ = PollServerStatusAsync();
     }
 
     private async Task LoadPatchNotesAsync()
@@ -224,6 +249,51 @@ public class MainViewModel : INotifyPropertyChanged
                 PatchButtonText = "RETRY";
             });
         }
+    }
+
+    // ── Server status polling ─────────────────────────────────────────────────
+
+    private async Task UpdateServerStatusAsync()
+    {
+        try
+        {
+            var status = await new ServerStatusService(_http).FetchAsync();
+            if (status == null) return;
+
+            SetUI(() =>
+            {
+                if (status.Online)
+                {
+                    ServerDotColor    = new SolidColorBrush(Color.FromRgb(0x4C, 0xAF, 0x50)); // green
+                    ServerStatusText  = "Online";
+                    PlayerCountText   = status.PlayersOnline == 1
+                        ? "1 player online"
+                        : $"{status.PlayersOnline} players online";
+                }
+                else
+                {
+                    ServerDotColor   = new SolidColorBrush(Color.FromRgb(0xF4, 0x43, 0x36)); // red
+                    ServerStatusText = "Offline";
+                    PlayerCountText  = "";
+                }
+            });
+        }
+        catch
+        {
+            SetUI(() =>
+            {
+                ServerDotColor   = new SolidColorBrush(Color.FromRgb(0x6A, 0x6A, 0x6A)); // gray
+                ServerStatusText = "Unknown";
+                PlayerCountText  = "";
+            });
+        }
+    }
+
+    private async Task PollServerStatusAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(60));
+        while (await timer.WaitForNextTickAsync())
+            await UpdateServerStatusAsync();
     }
 
     // ── Game launch ────────────────────────────────────────────────────────────
