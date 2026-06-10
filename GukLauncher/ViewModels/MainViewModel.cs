@@ -137,6 +137,7 @@ public class MainViewModel : INotifyPropertyChanged
         LogService.Log("=== Guktown Launcher started ===");
         await Task.WhenAll(LoadPatchNotesAsync(), CheckForUpdatesAsync(), UpdateServerStatusAsync());
         _ = PollServerStatusAsync();
+        await CheckForLauncherUpdateAsync();
     }
 
     private async Task LoadPatchNotesAsync()
@@ -197,6 +198,34 @@ public class MainViewModel : INotifyPropertyChanged
                 StatusMessage = $"Update check failed: {ex.Message}";
                 CanPlay       = true;
             });
+        }
+    }
+
+    // ── Launcher self-update ───────────────────────────────────────────────────
+
+    private async Task CheckForLauncherUpdateAsync()
+    {
+        try
+        {
+            var svc  = new UpdateService(_http);
+            var info = await svc.CheckAsync();
+            if (info == null) return;
+
+            var result = System.Windows.MessageBox.Show(
+                $"Guktown Launcher {info.TagName} is available.\nInstall now?",
+                "Update Available",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Information);
+
+            if (result != System.Windows.MessageBoxResult.Yes) return;
+
+            SetUI(() => StatusMessage = $"Downloading update {info.TagName}...");
+            await svc.DownloadAndApplyAsync(info);
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            LogService.Log($"Launcher update check failed: {ex.Message}");
         }
     }
 
