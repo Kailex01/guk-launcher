@@ -2,7 +2,7 @@
   {
     "version": "1.0.2",
     "date": "2026-06-14",
-    "body": "## GukVoice\n\nGukVoice is now available! GukVoice is a text-to-speech client that gives NPCs unique voices, bringing the world of Guktown to life. Download it from the launcher and place it alongside your EverQuest client to get started."
+    "body": "## GukVoice\n\nGukVoice is now available! GukVoice is a text-to-speech client that gives NPCs unique voices, bringing the world of Guktown to life. Download it from the launcher and place it alongside your EverQuest client to get started.\n\n## Combat Log\n\nGukVoice includes a built-in combat log parser. While GukVoice is running, it watches your EQ log file in real time and automatically tracks your current fight — showing your target, damage dealt (melee and spell), damage taken, DPS out, DPS in, and a history of your last 100 fights.\n\nTo use it, open GukVoice and point it at your EQ log file (found in your EverQuest folder as `eqlog_CharacterName_guktown.txt`). The combat tab will update live as you fight."
   },
   {
     "version": "1.0.1",
